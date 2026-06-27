@@ -1,0 +1,148 @@
+#aum-badge {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2147483646;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #1f2937;
+  pointer-events: auto;
+  user-select: none;
+}
+
+#aum-badge.aum-badge--hidden {
+  display: none;
+}
+
+.aum-badge__card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-left: 3px solid #22c55e;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  min-width: 180px;
+  overflow: hidden;
+  transition: border-left-color 0.2s ease;
+}
+
+#aum-badge.aum-badge--warning .aum-badge__card {
+  border-left-color: #f97316;
+}
+
+#aum-badge.aum-badge--high .aum-badge__card {
+  border-left-color: #ef4444;
+}
+
+.aum-badge__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 8px;
+}
+
+.aum-badge__title {
+  font-weight: 600;
+  font-size: 11px;
+  color: #2563eb;
+  letter-spacing: 0.02em;
+}
+
+.aum-badge__platform {
+  font-size: 10px;
+  color: #6b7280;
+  background: #eef2ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.aum-badge__toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 14px;
+  padding: 0 2px;
+  line-height: 1;
+  border-radius: 4px;
+}
+
+.aum-badge__toggle:hover {
+  color: #2563eb;
+  background: #eef2ff;
+}
+
+.aum-badge__body {
+  padding: 10px 12px;
+}
+
+.aum-badge__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.aum-badge__row:last-child {
+  margin-bottom: 0;
+}
+
+.aum-badge__label {
+  color: #6b7280;
+  font-size: 11px;
+}
+
+.aum-badge__value {
+  font-weight: 600;
+  font-size: 12px;
+  color: #111827;
+}
+
+.aum-badge__value--model {
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.aum-badge__value--cost {
+  color: #2563eb;
+}
+
+#aum-badge.aum-badge--collapsed .aum-badge__body {
+  display: none;
+}
+
+#aum-badge.aum-badge--collapsed .aum-badge__card {
+  min-width: auto;
+}
+
+#aum-badge.aum-badge--collapsed .aum-badge__header {
+  border-bottom: none;
+}
+
+#aum-badge.aum-badge--collapsed .aum-badge__title {
+  display: none;
+}
+
+#aum-badge.aum-badge--collapsed .aum-badge__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 11px;
+  color: #111827;
+}
+
+.aum-badge__pill {
+  display: none;
+}
+
+.aum-badge__pill-count {
+  color: #2563eb;
+}

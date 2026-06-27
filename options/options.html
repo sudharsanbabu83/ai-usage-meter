@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Usage Meter — Options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1>AI Usage Meter Settings</h1>
+        <p class="privacy-note">
+          Prompt content is not stored. Only token and cost metadata are saved
+          locally.
+        </p>
+      </header>
+
+      <form id="options-form" class="form">
+        <div class="field">
+          <label for="default-model">Fallback model</label>
+          <p class="field-hint">Used when auto-detection cannot find a model on the page.</p>
+          <select id="default-model" name="defaultModel"></select>
+        </div>
+
+        <div class="field field--checkbox">
+          <label class="checkbox-label">
+            <input type="checkbox" id="manual-override" name="manualModelOverride" />
+            Use manual model override instead of auto-detection
+          </label>
+        </div>
+
+        <div class="field">
+          <label for="output-tokens">Estimated output tokens per prompt</label>
+          <input
+            type="number"
+            id="output-tokens"
+            name="estimatedOutputTokens"
+            min="0"
+            step="50"
+          />
+        </div>
+
+        <div class="field">
+          <label for="token-limit">Daily token warning limit</label>
+          <input
+            type="number"
+            id="token-limit"
+            name="dailyTokenWarningLimit"
+            min="0"
+            step="100"
+          />
+        </div>
+
+        <div class="field">
+          <label for="cost-limit">Daily cost warning limit (USD)</label>
+          <input
+            type="number"
+            id="cost-limit"
+            name="dailyCostWarningLimit"
+            min="0"
+            step="0.01"
+          />
+        </div>
+
+        <div class="field field--checkbox">
+          <label class="checkbox-label">
+            <input type="checkbox" id="enable-badge" name="enableFloatingBadge" />
+            Enable floating badge on supported sites
+          </label>
+        </div>
+
+        <div class="field field--checkbox">
+          <label class="checkbox-label">
+            <input type="checkbox" id="enable-logging" name="enableUsageLogging" />
+            Enable local usage logging
+          </label>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn--primary">Save settings</button>
+          <span class="save-toast" id="save-toast" hidden>Saved</span>
+        </div>
+      </form>
+
+      <section class="danger-zone">
+        <h2>Data</h2>
+        <p class="danger-zone__desc">
+          Remove all locally stored usage records. Settings are kept.
+        </p>
+        <button type="button" class="btn btn--danger" id="clear-data">
+          Clear all usage data
+        </button>
+      </section>
+    </div>
+
+    <script src="../src/utils.js"></script>
+    <script src="../src/tokenizer.js"></script>
+    <script src="../src/pricing.js"></script>
+    <script src="../src/platformDetector.js"></script>
+    <script src="../src/storage.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>
