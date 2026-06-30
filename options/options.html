@@ -77,6 +77,97 @@
           </label>
         </div>
 
+        <section class="form-section">
+          <h2 class="form-section__title">Prompt optimizer</h2>
+          <p class="form-section__desc">
+            Suggests shorter prompts to reduce token usage. Local LLMs (LM Studio or
+            Ollama) run on your machine — prompt text is sent only locally, never stored.
+          </p>
+
+          <div class="field field--checkbox">
+            <label class="checkbox-label">
+              <input type="checkbox" id="enable-optimizer" name="enablePromptOptimizer" />
+              Show prompt optimizer on supported sites
+            </label>
+          </div>
+
+          <div class="field field--checkbox">
+            <label class="checkbox-label">
+              <input type="checkbox" id="enable-quick-compression" name="enableQuickCompression" />
+              Enable quick compression (no LLM — trims filler and whitespace)
+            </label>
+          </div>
+
+          <div class="field field--checkbox">
+            <label class="checkbox-label">
+              <input type="checkbox" id="enable-local-llm" name="enableLocalLlmOptimizer" />
+              Use local LLM for smarter rewrites
+            </label>
+          </div>
+
+          <div class="field">
+            <label for="local-llm-provider">Local LLM provider</label>
+            <select id="local-llm-provider" name="localLlmProvider">
+              <option value="lmstudio">LM Studio</option>
+              <option value="ollama">Ollama</option>
+            </select>
+          </div>
+
+          <div id="lmstudio-fields">
+            <div class="field">
+              <label for="lmstudio-url">LM Studio base URL</label>
+              <p class="field-hint">Start the server in LM Studio's Developer tab (default port 1234).</p>
+              <input
+                type="text"
+                id="lmstudio-url"
+                name="lmstudioBaseUrl"
+                placeholder="http://127.0.0.1:1234"
+              />
+            </div>
+
+            <div class="field">
+              <label for="lmstudio-model">LM Studio model name</label>
+              <p class="field-hint">Optional — leave blank if only one model is loaded.</p>
+              <input
+                type="text"
+                id="lmstudio-model"
+                name="lmstudioModel"
+                placeholder="e.g. meta-llama/Meta-Llama-3-8B-Instruct"
+              />
+            </div>
+          </div>
+
+          <div id="ollama-fields" hidden>
+            <div class="field">
+              <label for="ollama-url">Ollama base URL</label>
+              <input
+                type="text"
+                id="ollama-url"
+                name="ollamaBaseUrl"
+                placeholder="http://127.0.0.1:11434"
+              />
+            </div>
+
+            <div class="field">
+              <label for="ollama-model">Ollama model name</label>
+              <p class="field-hint">Must match a model pulled in Ollama (e.g. llama3.2, qwen2.5:7b).</p>
+              <input
+                type="text"
+                id="ollama-model"
+                name="ollamaModel"
+                placeholder="llama3.2"
+              />
+            </div>
+          </div>
+
+          <div class="local-llm-test">
+            <button type="button" class="btn btn--secondary" id="test-local-llm">
+              Test local LLM connection
+            </button>
+            <span class="local-llm-test__result" id="local-llm-test-result"></span>
+          </div>
+        </section>
+
         <div class="actions">
           <button type="submit" class="btn btn--primary">Save settings</button>
           <span class="save-toast" id="save-toast" hidden>Saved</span>
@@ -96,6 +187,7 @@
 
     <script src="../src/utils.js"></script>
     <script src="../src/tokenizer.js"></script>
+    <script src="../src/promptOptimizer.js"></script>
     <script src="../src/pricing.js"></script>
     <script src="../src/platformDetector.js"></script>
     <script src="../src/storage.js"></script>

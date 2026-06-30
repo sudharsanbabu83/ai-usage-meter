@@ -146,3 +146,177 @@
 .aum-badge__pill-count {
   color: #2563eb;
 }
+
+.aum-badge__optimizer {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.aum-badge__tips {
+  margin: 0 0 8px;
+  padding-left: 16px;
+  color: #6b7280;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.aum-badge__tips li {
+  margin-bottom: 3px;
+}
+
+.aum-badge__optimize-btn {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.aum-badge__optimize-btn:hover:not(:disabled) {
+  background: #dbeafe;
+}
+
+.aum-badge__optimize-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.aum-badge__optimize-btn--loading {
+  cursor: wait;
+}
+
+.aum-badge__panel {
+  border-top: 1px solid #e5e7eb;
+  background: #f8fafc;
+  padding: 10px 12px;
+  max-width: 320px;
+}
+
+.aum-badge__panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.aum-badge__panel-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.aum-badge__panel-close {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.aum-badge__panel-close:hover {
+  color: #111827;
+}
+
+.aum-badge__panel-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  font-size: 10px;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.aum-badge__panel-stat {
+  font-weight: 600;
+  color: #374151;
+}
+
+.aum-badge__panel-saved {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.aum-badge__panel-increased {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.aum-badge__panel-unchanged {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.aum-badge__panel-preview {
+  margin: 0 0 8px;
+  padding: 8px;
+  max-height: 120px;
+  overflow: auto;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 10px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #111827;
+  font-family: inherit;
+}
+
+.aum-badge__panel-error {
+  font-size: 10px;
+  color: #dc2626;
+  margin-bottom: 8px;
+}
+
+.aum-badge__panel-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.aum-badge__panel-btn {
+  flex: 1;
+  padding: 5px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.aum-badge__panel-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.aum-badge__panel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.aum-badge__panel-btn--primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.aum-badge__panel-btn--primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+#aum-badge.aum-badge--panel-open .aum-badge__card {
+  min-width: 280px;
+}
+
+#aum-badge.aum-badge--collapsed .aum-badge__optimizer,
+#aum-badge.aum-badge--collapsed .aum-badge__panel {
+  display: none;
+}

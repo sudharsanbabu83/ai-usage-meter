@@ -13,7 +13,15 @@ const DEFAULT_SETTINGS = {
   dailyCostWarningLimit: 1.0,
   enableFloatingBadge: true,
   enableUsageLogging: true,
-  manualModelOverride: false
+  manualModelOverride: false,
+  enablePromptOptimizer: true,
+  enableQuickCompression: true,
+  enableLocalLlmOptimizer: false,
+  localLlmProvider: "lmstudio",
+  ollamaBaseUrl: "http://127.0.0.1:11434",
+  ollamaModel: "llama3.2",
+  lmstudioBaseUrl: "http://127.0.0.1:1234",
+  lmstudioModel: ""
 };
 
 function getFromStorage(keys) {
@@ -34,7 +42,17 @@ function setInStorage(data) {
 
 async function getSettings() {
   const result = await getFromStorage(STORAGE_KEYS.settings);
-  return { ...DEFAULT_SETTINGS, ...(result.settings || {}) };
+  const stored = result.settings || {};
+  const settings = { ...DEFAULT_SETTINGS, ...stored };
+
+  if (
+    stored.enableOllamaOptimizer !== undefined &&
+    stored.enableLocalLlmOptimizer === undefined
+  ) {
+    settings.enableLocalLlmOptimizer = stored.enableOllamaOptimizer;
+  }
+
+  return settings;
 }
 
 async function saveSettings(partial) {

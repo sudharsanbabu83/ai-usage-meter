@@ -77,11 +77,70 @@ body {
   background: #fff;
 }
 
+.field input[type="text"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #111827;
+  background: #fff;
+}
+
 .field input:focus,
 .field select:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.form-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.form-section__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.form-section__desc {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+.local-llm-test {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.local-llm-test__result {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.local-llm-test__result--ok {
+  color: #16a34a;
+}
+
+.local-llm-test__result--error {
+  color: #dc2626;
+}
+
+.btn--secondary {
+  background: #ffffff;
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.btn--secondary:hover {
+  background: #f3f4f6;
 }
 
 .field--checkbox {

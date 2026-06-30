@@ -66,6 +66,7 @@
 
   const WARNING_TOKEN_THRESHOLD = 2000;
   const HIGH_TOKEN_THRESHOLD = 8000;
+  const OPTIMIZER_TIP_THRESHOLD = 500;
   const SUBMIT_DEBOUNCE_MS = 2000;
   const DUPLICATE_WINDOW_MS = 5000;
 
@@ -84,6 +85,8 @@
   let isCollapsed = false;
   let pollTimer = null;
   let modelPollTimer = null;
+  let optimizerPanelOpen = false;
+  let lastOptimizeResult = null;
 
   function getFallbackModel() {
     return settings.defaultModel || getDefaultModelForPlatform(platform.name);
@@ -179,6 +182,7 @@
       }
 
       updateBadge(currentTokens);
+      updateOptimizerSection(currentTokens);
     });
   }
 
@@ -213,6 +217,32 @@
             <span class="aum-badge__label">Est. cost</span>
             <span class="aum-badge__value aum-badge__value--cost" data-aum-cost>$0.00</span>
           </div>
+          <div class="aum-badge__optimizer" data-aum-optimizer hidden>
+            <ul class="aum-badge__tips" data-aum-tips></ul>
+            <button class="aum-badge__optimize-btn" type="button" data-aum-optimize>
+              Optimize prompt
+            </button>
+          </div>
+        </div>
+        <div class="aum-badge__panel" data-aum-panel hidden>
+          <div class="aum-badge__panel-header">
+            <span class="aum-badge__panel-title">Suggested prompt</span>
+            <button class="aum-badge__panel-close" type="button" aria-label="Close" data-aum-panel-close>×</button>
+          </div>
+          <div class="aum-badge__panel-stats" data-aum-panel-stats></div>
+          <pre class="aum-badge__panel-preview" data-aum-panel-preview></pre>
+          <div class="aum-badge__panel-error" data-aum-panel-error hidden></div>
+          <div class="aum-badge__panel-actions">
+            <button class="aum-badge__panel-btn aum-badge__panel-btn--primary" type="button" data-aum-apply>
+              Apply
+            </button>
+            <button class="aum-badge__panel-btn" type="button" data-aum-copy>
+              Copy
+            </button>
+            <button class="aum-badge__panel-btn" type="button" data-aum-panel-dismiss>
+              Dismiss
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -231,6 +261,31 @@
     if (isCollapsed) {
       toggleBtn.textContent = "▸";
     }
+
+    badgeEl.querySelector("[data-aum-optimize]").addEventListener("click", (e) => {
+      e.stopPropagation();
+      runOptimize();
+    });
+
+    badgeEl.querySelector("[data-aum-panel-close]").addEventListener("click", (e) => {
+      e.stopPropagation();
+      hideSuggestionPanel();
+    });
+
+    badgeEl.querySelector("[data-aum-panel-dismiss]").addEventListener("click", (e) => {
+      e.stopPropagation();
+      hideSuggestionPanel();
+    });
+
+    badgeEl.querySelector("[data-aum-apply]").addEventListener("click", (e) => {
+      e.stopPropagation();
+      applySuggestion();
+    });
+
+    badgeEl.querySelector("[data-aum-copy]").addEventListener("click", (e) => {
+      e.stopPropagation();
+      copySuggestion();
+    });
 
     updateBadgeModelDisplay();
     updateBadge(0);
@@ -257,6 +312,212 @@
       badgeEl.classList.add("aum-badge--high");
     } else if (tokens >= WARNING_TOKEN_THRESHOLD) {
       badgeEl.classList.add("aum-badge--warning");
+    }
+
+    updateOptimizerSection(tokens);
+  }
+
+  function isOptimizerAvailable() {
+    return (
+      settings.enablePromptOptimizer &&
+      (settings.enableQuickCompression || usesLocalLlmOptimizer(settings))
+    );
+  }
+
+  function updateOptimizerSection(tokens) {
+    if (!badgeEl) return;
+
+    const section = badgeEl.querySelector("[data-aum-optimizer]");
+    const tipsEl = badgeEl.querySelector("[data-aum-tips]");
+    const optimizeBtn = badgeEl.querySelector("[data-aum-optimize]");
+
+    if (!section || !tipsEl || !optimizeBtn) return;
+
+    const text = activeInput ? getInputText(activeInput).trim() : "";
+    const showSection =
+      isOptimizerAvailable() && text.length > 0 && tokens >= OPTIMIZER_TIP_THRESHOLD;
+
+    section.hidden = !showSection;
+
+    if (!showSection) {
+      tipsEl.innerHTML = "";
+      return;
+    }
+
+    const tips = getPromptTips(text, tokens);
+    tipsEl.innerHTML = tips.map((tip) => `<li>${escapeHtml(tip)}</li>`).join("");
+
+    const useLocalLlm = usesLocalLlmOptimizer(settings);
+    const providerLabel = useLocalLlm
+      ? getLocalLlmProviderLabel(getLocalLlmConfig(settings).provider)
+      : "quick";
+    const methodLabel = useLocalLlm ? `via ${providerLabel}` : "quick";
+    optimizeBtn.textContent = useLocalLlm
+      ? "Optimize with local LLM"
+      : "Optimize prompt";
+    optimizeBtn.title = `Compress prompt ${methodLabel}`;
+    optimizeBtn.disabled = optimizerPanelOpen && optimizeBtn.classList.contains("aum-badge__optimize-btn--loading");
+  }
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function setInputText(element, text) {
+    if (!element) return;
+
+    if (element.tagName === "TEXTAREA" || element.tagName === "INPUT") {
+      element.value = text;
+    } else {
+      element.textContent = text;
+    }
+
+    element.dispatchEvent(new Event("input", { bubbles: true }));
+    element.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  function showSuggestionPanel(result, { loading = false, error = "" } = {}) {
+    if (!badgeEl) return;
+
+    optimizerPanelOpen = true;
+    lastOptimizeResult = result;
+
+    const panel = badgeEl.querySelector("[data-aum-panel]");
+    const statsEl = badgeEl.querySelector("[data-aum-panel-stats]");
+    const previewEl = badgeEl.querySelector("[data-aum-panel-preview]");
+    const errorEl = badgeEl.querySelector("[data-aum-panel-error]");
+    const applyBtn = badgeEl.querySelector("[data-aum-apply]");
+    const copyBtn = badgeEl.querySelector("[data-aum-copy]");
+
+    panel.hidden = false;
+    badgeEl.classList.add("aum-badge--panel-open");
+
+    if (loading) {
+      statsEl.textContent = "Optimizing…";
+      previewEl.textContent = "";
+      errorEl.hidden = true;
+      applyBtn.disabled = true;
+      copyBtn.disabled = true;
+      return;
+    }
+
+    if (error) {
+      statsEl.textContent = "Optimization failed";
+      previewEl.textContent = "";
+      errorEl.textContent = error;
+      errorEl.hidden = false;
+      applyBtn.disabled = true;
+      copyBtn.disabled = true;
+      return;
+    }
+
+    const methodLabel =
+      result.method === "ollama" || result.method === "lmstudio" ? "Local LLM" : "Quick";
+    const tokenDelta = result.originalTokens - result.suggestedTokens;
+    const savedPct =
+      result.originalTokens > 0 && tokenDelta > 0
+        ? Math.round((tokenDelta / result.originalTokens) * 100)
+        : 0;
+
+    let deltaLabel;
+    let deltaClass = "aum-badge__panel-saved";
+
+    if (tokenDelta > 0) {
+      deltaLabel = `−${formatTokens(tokenDelta)} (${savedPct}%)`;
+    } else if (tokenDelta < 0) {
+      deltaLabel = `+${formatTokens(Math.abs(tokenDelta))} longer`;
+      deltaClass = "aum-badge__panel-increased";
+    } else {
+      deltaLabel = "no change";
+      deltaClass = "aum-badge__panel-unchanged";
+    }
+
+    statsEl.innerHTML = `
+      <span>${methodLabel}</span>
+      <span class="aum-badge__panel-stat">${formatTokens(result.originalTokens)} → ${formatTokens(result.suggestedTokens)} tokens</span>
+      <span class="${deltaClass}">${deltaLabel}</span>
+    `;
+    previewEl.textContent = result.suggested;
+    errorEl.hidden = true;
+    applyBtn.disabled = tokenDelta <= 0;
+    copyBtn.disabled = !result.suggested;
+  }
+
+  function hideSuggestionPanel() {
+    if (!badgeEl) return;
+
+    optimizerPanelOpen = false;
+    lastOptimizeResult = null;
+
+    const panel = badgeEl.querySelector("[data-aum-panel]");
+    const optimizeBtn = badgeEl.querySelector("[data-aum-optimize]");
+
+    panel.hidden = true;
+    badgeEl.classList.remove("aum-badge--panel-open");
+
+    if (optimizeBtn) {
+      optimizeBtn.classList.remove("aum-badge__optimize-btn--loading");
+      optimizeBtn.disabled = false;
+    }
+  }
+
+  async function runOptimize() {
+    if (!activeInput || !isOptimizerAvailable()) return;
+
+    const text = getInputText(activeInput).trim();
+    if (!text) return;
+
+    const optimizeBtn = badgeEl.querySelector("[data-aum-optimize]");
+    const useLocalLlm = usesLocalLlmOptimizer(settings);
+    const providerLabel = useLocalLlm
+      ? getLocalLlmProviderLabel(getLocalLlmConfig(settings).provider)
+      : "";
+
+    optimizeBtn.classList.add("aum-badge__optimize-btn--loading");
+    optimizeBtn.disabled = true;
+    optimizeBtn.textContent = useLocalLlm
+      ? `Calling ${providerLabel}…`
+      : "Optimizing…";
+
+    showSuggestionPanel(null, { loading: true });
+
+    try {
+      const result = await optimizePrompt(text, settings);
+      showSuggestionPanel(result);
+    } catch (err) {
+      showSuggestionPanel(null, {
+        error:
+          err.message ||
+          "Could not optimize prompt. Check your local LLM server is running."
+      });
+    } finally {
+      optimizeBtn.classList.remove("aum-badge__optimize-btn--loading");
+      optimizeBtn.disabled = false;
+      optimizeBtn.textContent = useLocalLlm
+        ? "Optimize with local LLM"
+        : "Optimize prompt";
+    }
+  }
+
+  function applySuggestion() {
+    if (!lastOptimizeResult?.suggested || !activeInput) return;
+
+    setInputText(activeInput, lastOptimizeResult.suggested);
+    hideSuggestionPanel();
+    onInputChange();
+  }
+
+  async function copySuggestion() {
+    if (!lastOptimizeResult?.suggested) return;
+
+    try {
+      await navigator.clipboard.writeText(lastOptimizeResult.suggested);
+    } catch {
+      /* clipboard may be blocked */
     }
   }
 
